@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trigger Management</title>
+</head>
+<body>
+    <h1>Trigger Management</h1>
+
+    <h2>Create a Trigger</h2>
+    <form method="POST">
+        {% csrf_token %}
+        
+        <!-- Trigger Type Selection -->
+        <label for="trigger_type">Trigger Type:</label>
+        <select id="trigger_type" name="trigger_type">
+            <option value="scheduled">Scheduled</option>
+            <option value="api">API</option>
+        </select>
+        <br>
+
+        <!-- Trigger Name -->
+        <label for="name">Trigger Name:</label>
+        <input type="text" id="name" name="name" required>
+        <br>
+
+        <!-- Scheduled Trigger Fields -->
+        <div id="scheduled_fields" style="display:none;">
+            <label for="time">Scheduled Time:</label>
+            <input type="datetime-local" id="time" name="time" required>
+            <br>
+
+            <label for="interval_option">Recurring Interval:</label>
+            <select id="interval_option" name="interval_option">
+                <option value="none">None</option>
+                <option value="fixed_interval">Fixed Interval</option>
+            </select>
+            <br>
+
+            <!-- Interval Time -->
+            <div id="interval_fields" style="display:none;">
+                <label for="interval_time">Interval Time (in minutes):</label>
+                <input type="number" id="interval_time" name="interval_time" min="1">
+                <br>
+            </div>
+        </div>
+
+        <!-- API Trigger Fields -->
+        <div id="api_fields" style="display:none;">
+            <label for="endpoint">API Endpoint:</label>
+            <input type="text" id="endpoint" name="endpoint" required>
+            <br>
+
+            <label for="payload">API Payload (JSON format):</label>
+            <textarea id="payload" name="payload" rows="4" cols="50" required>
+            </textarea>
+            <br>
+        </div>
+
+        <button type="submit">Create Trigger</button>
+    </form>
+
+    <h2>Existing Triggers</h2>
+    <ul>
+        {% for trigger in triggers %}
+            <li>{{ trigger.name }} ({{ trigger.trigger_type }})</li>
+        {% endfor %}
+    </ul>
+
+    <script>
+        // Handle trigger type selection (Scheduled or API)
+        const triggerTypeField = document.getElementById('trigger_type');
+        const scheduledFields = document.getElementById('scheduled_fields');
+        const apiFields = document.getElementById('api_fields');
+        const intervalOptionField = document.getElementById('interval_option');
+        const intervalFields = document.getElementById('interval_fields');
+
+        // Function to display fields based on trigger type
+        function toggleFields() {
+            if (triggerTypeField.value === 'scheduled') {
+                scheduledFields.style.display = 'block';
+                apiFields.style.display = 'none';
+            } else if (triggerTypeField.value === 'api') {
+                scheduledFields.style.display = 'none';
+                apiFields.style.display = 'block';
+            }
+        }
+
+        // Function to handle the recurring interval option
+        function toggleIntervalFields() {
+            if (intervalOptionField.value === 'fixed_interval') {
+                intervalFields.style.display = 'block';
+            } else {
+                intervalFields.style.display = 'none';
+            }
+        }
+
+        // Initialize the fields based on the selected trigger type when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleFields();
+            toggleIntervalFields();
+        });
+
+        // Listen for changes to the trigger type and interval option fields
+        triggerTypeField.addEventListener('change', function() {
+            toggleFields();
+        });
+
+        intervalOptionField.addEventListener('change', function() {
+            toggleIntervalFields();
+        });
+    </script>
+</body>
+</html>
+
